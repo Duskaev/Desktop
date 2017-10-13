@@ -1,0 +1,65 @@
+import sys.path as Path
+
+from calendar import storage
+
+get_connection = lambda : storage.connect('storage.sqlite')
+
+def action_task_print():#Показать все задачи
+    with get_connection() as conn:
+        rows = storag.print_task(conn)
+
+    template = '{row[id]} - {row[task_massage]}'
+
+    for row in rows:
+        print(template.format(row=row))
+
+def action_task_add():#Добавить задачу
+    tsk = input("\nЗапишите задачу")
+
+    if not tsk:
+        return
+
+with get_connection() as conn:
+    task_massage = storage.new_task(conn, tsk)
+
+print('Задача: {}'.format(task_massage))
+
+def action_task_edit(): #Редактировать задачу
+    pass
+
+def action_task_finish():#Завершить задачу
+    pass
+
+def action_task_restart():#Начать задачу заново
+    pass
+
+def action_show_menu():#показать меню
+	print("""
+Ежедневник выберете действие:
+1. Вывести список задач
+2. Добавить задачу
+3. Отредактировать задачу
+4. Завершить задачу
+5. Начать задачу сначала
+q. Выйти""")
+
+def action_exit():#выйти из программы
+	sys.exit(0)
+
+#Функция для вызова пунктов меню
+def main():
+    creation_schema = Path.join( #ищем путь к файлу схема.ру
+        path.dirname(__file__), 'shema.sql'#возвращает путь к текущему файлу инит.py
+    )
+
+    with get_connection() as conn:#подключение  будем всегда использовать
+    	storage.initilize(conn. creation_schema)
+
+    actions = {#action новая переменная
+	'1': action_task_print,
+	'2': action_task_add,
+	'3': action_task_edit,
+    '4': action_task_finish,
+	'5':action_task_restart,
+	'q': action_exit
+	}
