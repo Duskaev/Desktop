@@ -4,36 +4,69 @@ from calendar import storage
 
 get_connection = lambda : storage.connect('storage.sqlite')
 
-def action_task_print():#Показать все задачи
+def action_task_print():
     with get_connection() as conn:
         rows = storag.print_task(conn)
 
-    template = '{row[id]} - {row[task_massage]}'
+    template = '{row[id]} - {row[zagolovok]} - {row[task_massage]} - {row[status]}'
 
     for row in rows:
         print(template.format(row=row))
 
-def action_task_add():#Добавить задачу
-    tsk = input("\nЗапишите задачу")
+def action_task_add():
+    task_massage = input('\nВведите задачу')
+    zagolovok = input('\nВведите заголовок')
 
-    if not tsk:
-        return
+        if not tsk:
+            return
 
-with get_connection() as conn:
-    task_massage = storage.new_task(conn, tsk)
+    with get_connection() as conn:
+    status = 'Задача не выполнена'
+    task_massage = storage.new_task(conn, task_massage, zagolovok, status)
 
-print('Задача: {}'.format(task_massage))
+    print('Задача: {}'.format(task_massage))
 
-def action_task_edit(): #Редактировать задачу
-    pass
+def action_task_edit():
+    zagolovok = input('\nВведите заголовок задачи')
+    if zagolovok:
+        with get_connection() as conn:
+            task = storage.find_task(conn,zagolovok)
+        if task:
+            taskbec = input('\nВведите новую задачу')
+            with get_connection() as conn:
+                taskbec = storage.mod_task(conn,taskbec, zagolovok)
+                print('\nЗадача "{}" обновлена'.format(zagolovok))
+        else:
+            print('\nЗачада "{}" не найдена'.format(zagolovok))
 
-def action_task_finish():#Завершить задачу
-    pass
+def action_task_finish():
+    zagolovok = input('\nВведите заголовок задачи')
+    if zagolovok:
+        with get_connection() as conn:
+            task = storage.find_task(conn, zagolovok)
+        if task:
+            status1 = 'Закончена'
+            with get_connection() as conn:
+                taskbec = storage.finish_task(conn, zagolovok, status1)
+                print('\nСтатус задачи {} изменен'.format(zagolovok))
+            else:
+                print('\nЗачада "{}" не найдена'.format(zagolovok))
 
-def action_task_restart():#Начать задачу заново
-    pass
+def action_task_restart():
+    zagolovok = input('\nВведите заголовок задачи')
+    if zagolovok:
+        with get_connection() as conn:
+            task = storage.find_task(conn, zagolovok)
+        if task:
+            status1 = 'Задача не выполнена'
+            with get_connection() as conn:
+                taskbec = storage.finish_task(conn, zagolovok, status1)
+                print('\nСтатус задачи {} изменен'.format(zagolovok))
+            else:
+                print('\nЗачада "{}" не найдена'.format(zagolovok))
 
-def action_show_menu():#показать меню
+
+def action_show_menu():
 	print("""
 Ежедневник выберете действие:
 1. Вывести список задач
@@ -43,19 +76,19 @@ def action_show_menu():#показать меню
 5. Начать задачу сначала
 q. Выйти""")
 
-def action_exit():#выйти из программы
+def action_exit():
 	sys.exit(0)
 
-#Функция для вызова пунктов меню
+
 def main():
-    creation_schema = Path.join( #ищем путь к файлу схема.ру
-        path.dirname(__file__), 'shema.sql'#возвращает путь к текущему файлу инит.py
+    creation_schema = Path.join(
+        path.dirname(__file__), 'shema.sql'
     )
 
-    with get_connection() as conn:#подключение  будем всегда использовать
+    with get_connection() as conn:
     	storage.initilize(conn. creation_schema)
 
-    actions = {#action новая переменная
+    actions = {
 	'1': action_task_print,
 	'2': action_task_add,
 	'3': action_task_edit,
@@ -63,3 +96,13 @@ def main():
 	'5':action_task_restart,
 	'q': action_exit
 	}
+
+    action_task_print()
+    while True:
+        cmd = input ('\nВведите команду')
+        action = action.get(cmd)
+
+        if action:
+            action()
+        else:
+            print('Неизвестная команда')
